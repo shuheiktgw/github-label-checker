@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -39,4 +40,15 @@ func testMethod(t *testing.T, r *http.Request, want string) {
 	if got := r.Method; got != want {
 		t.Errorf("Request method: %v, want %v", got, want)
 	}
+}
+
+func setupChecker() (reviewer *LabelChecker, mux *http.ServeMux, url string, tearDown func()) {
+	client, mux, url, tearDown := setup()
+	return &LabelChecker{client}, mux, url, tearDown
+}
+
+func setPullRequestHandler(mux *http.ServeMux, number int, pr string) {
+	mux.HandleFunc(fmt.Sprintf("/repos/%v/%v/pulls/%d", testGitHubOwner, testGitHubRepo, number), func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, pr)
+	})
 }
