@@ -7,12 +7,16 @@ import (
 func TestLabelChecker_Check_Success(t *testing.T) {
 	cases := []struct {
 		labels []string
+		casual bool
 		expected bool
 	}{
-		{labels: []string{"test"}, expected: false},
-		{labels: []string{"test1", "test2"}, expected: false},
-		{labels: []string{"bug"}, expected: true},
-		{labels: []string{"good first issue", "test1", "test2"}, expected: true},
+		{labels: []string{"test"}, casual: true, expected: false},
+		{labels: []string{"test1", "test2"}, casual: true, expected: false},
+		{labels: []string{"bug"}, casual: true, expected: true},
+		{labels: []string{"bu"}, casual: true, expected: true},
+		{labels: []string{"bu"}, casual: false, expected: false},
+		{labels: []string{"bug"}, casual: false, expected: true},
+		{labels: []string{"good first issue", "test1", "test2"}, casual: true, expected: true},
 	}
 
 	checker, mux, _, tearDown := setupChecker()
@@ -22,7 +26,7 @@ func TestLabelChecker_Check_Success(t *testing.T) {
 	setPullRequestHandler(mux, number, `{"labels":[{"name":"bug"},{"name":"good first issue"}]}`)
 
 	for i, tc := range cases {
-		result, _, err := checker.Check(number, tc.labels)
+		result, _, err := checker.Check(number, tc.labels, tc.casual)
 		if err != nil {
 			t.Fatalf("#%d LabelChecker.Check returned unexpected error: %v", i, err)
 		}
@@ -40,7 +44,7 @@ func TestLabelChecker_Check_Fail(t *testing.T) {
 	number := 1
 	setPullRequestHandler(mux, number, `{"labels":[]}`)
 
-	_, _, err := checker.Check(number, []string{"bug"})
+	_, _, err := checker.Check(number, []string{"bug"}, false)
 	if err == nil {
 		t.Fatalf("LabelChecker.Check is supposed to return error")
 	}

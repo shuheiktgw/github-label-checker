@@ -11,7 +11,7 @@ type LabelChecker struct {
 }
 
 // Check checks if the specified PR has given labels
-func(lc *LabelChecker) Check(number int, labels []string) (bool, []string, error) {
+func(lc *LabelChecker) Check(number int, labels []string, casual bool) (bool, []string, error) {
 	pr, err := lc.GetPullRequest(number)
 	if err != nil {
 		return false, nil, err
@@ -26,19 +26,25 @@ func(lc *LabelChecker) Check(number int, labels []string) (bool, []string, error
 		upstreamLabels = append(upstreamLabels, *lb.Name)
 	}
 
-	result, err := check(upstreamLabels, labels)
+	result, err := check(upstreamLabels, labels, casual)
 	return result, upstreamLabels, err
 }
 
-func check(upstreamLabels []string, labels []string) (bool, error) {
+func check(upstreamLabels []string, labels []string, casual bool) (bool, error) {
 	for _, ul := range upstreamLabels {
 		for _, l := range labels {
-			r, err := regexp.Compile(l)
-			if err != nil {
-				return false, err
+			if casual {
+				r, err := regexp.Compile(l)
+				if err != nil {
+					return false, err
+				}
+
+				if r.Match([]byte(ul)) {
+					return true, nil
+				}
 			}
 
-			if r.Match([]byte(ul)) {
+			if ul == l {
 				return true, nil
 			}
 		}
