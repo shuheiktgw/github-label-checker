@@ -23,7 +23,7 @@ func TestLabelChecker_Integration_Check_Success(t *testing.T) {
 		time.Sleep(2 * time.Second)
 
 		lc := LabelChecker{integrationGitHubClient}
-		result, err := lc.Check(tc.prNum, tc.labels)
+		result, _, err := lc.Check(tc.prNum, tc.labels)
 
 		if err != nil {
 			t.Fatalf("#%d Unexpected error occurred from LabelChecker.Check: %s", i, err)
@@ -47,7 +47,7 @@ func TestLabelChecker_Integration_Check_Fail(t *testing.T) {
 		time.Sleep(2 * time.Second)
 
 		lc := LabelChecker{integrationGitHubClient}
-		_, err := lc.Check(tc.prNum, []string{"test"})
+		_, _, err := lc.Check(tc.prNum, []string{"test"})
 
 		if err == nil {
 			t.Fatalf("#%d LabelChecker.Check is supposed to return error", i)

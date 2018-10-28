@@ -11,14 +11,14 @@ type LabelChecker struct {
 }
 
 // Check checks if the specified PR has given labels
-func(lc *LabelChecker) Check(number int, labels []string) (bool, error) {
+func(lc *LabelChecker) Check(number int, labels []string) (bool, []string, error) {
 	pr, err := lc.GetPullRequest(number)
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
 
 	if len(pr.Labels) == 0 {
-		return false, fmt.Errorf("the specified pull request does not have any labels")
+		return false, nil, fmt.Errorf("the specified pull request does not have any labels")
 	}
 
 	var upstreamLabels []string
@@ -26,7 +26,8 @@ func(lc *LabelChecker) Check(number int, labels []string) (bool, error) {
 		upstreamLabels = append(upstreamLabels, *lb.Name)
 	}
 
-	return check(upstreamLabels, labels)
+	result, err := check(upstreamLabels, labels)
+	return result, upstreamLabels, err
 }
 
 func check(upstreamLabels []string, labels []string) (bool, error) {

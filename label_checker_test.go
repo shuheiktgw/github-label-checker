@@ -22,7 +22,7 @@ func TestLabelChecker_Check_Success(t *testing.T) {
 	setPullRequestHandler(mux, number, `{"labels":[{"name":"bug"},{"name":"good first issue"}]}`)
 
 	for i, tc := range cases {
-		result, err := checker.Check(number, tc.labels)
+		result, _, err := checker.Check(number, tc.labels)
 		if err != nil {
 			t.Fatalf("#%d LabelChecker.Check returned unexpected error: %v", i, err)
 		}
@@ -40,7 +40,7 @@ func TestLabelChecker_Check_Fail(t *testing.T) {
 	number := 1
 	setPullRequestHandler(mux, number, `{"labels":[]}`)
 
-	_, err := checker.Check(number, []string{"bug"})
+	_, _, err := checker.Check(number, []string{"bug"})
 	if err == nil {
 		t.Fatalf("LabelChecker.Check is supposed to return error")
 	}
